@@ -1,0 +1,243 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <limits>
+using namespace std;
+
+class Employee {
+private:
+    int id;
+    string surname;
+    string name;
+    string patronymic;
+    double baseSalary;
+    int experience;
+    int workDays;
+    int totalWorkDays;
+    double bonus;
+    double pensionFund;
+    double alimony;
+
+    template <typename T>
+    void inputNumber(const string& prompt, T& var, bool nonNegative = false) {
+        while (true) {
+            cout << prompt;
+            if (cin >> var) {
+                if (nonNegative && var < 0) {
+                    cout << "Value cannot be negative! Try again.\n";
+                    continue;
+                }
+                break;
+            }
+            else {
+                cout << "Invalid input! Please enter a number.\n";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        }
+    }
+
+public:
+    Employee() : id(0), baseSalary(0), experience(0), workDays(0), totalWorkDays(0),
+        bonus(0), pensionFund(0), alimony(0) {
+    }
+
+    void set() {
+        inputNumber("Enter employee ID: ", id, true);
+        cout << "Enter surname: "; cin >> surname;
+        cout << "Enter name: "; cin >> name;
+        cout << "Enter patronymic: "; cin >> patronymic;
+        inputNumber("Enter base salary: ", baseSalary, true);
+        inputNumber("Enter years of experience: ", experience, true);
+        inputNumber("Enter total working days in month: ", totalWorkDays, true);
+
+        while (true) {
+            inputNumber("Enter worked days: ", workDays, true);
+            if (workDays <= totalWorkDays) break;
+            cout << "Worked days cannot exceed total working days! Try again.\n";
+        }
+
+        inputNumber("Enter bonus: ", bonus, true);
+        inputNumber("Enter pension fund deduction: ", pensionFund, true);
+        inputNumber("Enter alimony deduction: ", alimony, true);
+    }
+
+    void show() const {
+        cout << left << setw(5) << id
+            << setw(25) << (surname + " " + name + " " + patronymic)
+            << setw(10) << baseSalary
+            << setw(5) << experience
+            << setw(10) << workDays
+            << setw(10) << totalWorkDays
+            << setw(10) << bonus
+            << setw(10) << pensionFund
+            << setw(10) << alimony
+            << setw(10) << calcSalary() << endl;
+    }
+
+    int getId() const { return id; }
+    string getSurname() const { return surname; }
+
+    double calcSalary() const {
+        double salaryPerDay = (totalWorkDays > 0) ? baseSalary / totalWorkDays : 0;
+        double experienceBonus = 0;
+
+        if (experience >= 5) experienceBonus = baseSalary * 0.05;
+        if (experience >= 10) experienceBonus = baseSalary * 0.10;
+
+        double accrued = salaryPerDay * workDays + bonus + experienceBonus;
+        double totalDeduction = pensionFund + alimony;
+        return accrued - totalDeduction;
+    }
+};
+
+// Клас для зберігання працівників замість vector
+class EmployeeList {
+private:
+    Employee* arr;
+    int capacity;
+    int count;
+
+    void resize() {
+        int newCapacity = capacity * 2;
+        Employee* newArr = new Employee[newCapacity];
+        for (int i = 0; i < count; i++) {
+            newArr[i] = arr[i];
+        }
+        delete[] arr;
+        arr = newArr;
+        capacity = newCapacity;
+    }
+
+public:
+    EmployeeList(int initCap = 5) {
+        capacity = initCap;
+        count = 0;
+        arr = new Employee[capacity];
+    }
+
+    ~EmployeeList() {
+        delete[] arr;
+    }
+
+    void add(const Employee& e) {
+        if (count == capacity) resize();
+        arr[count++] = e;
+    }
+
+    bool removeById(int id) {
+        for (int i = 0; i < count; i++) {
+            if (arr[i].getId() == id) {
+                for (int j = i; j < count - 1; j++) {
+                    arr[j] = arr[j + 1];
+                }
+                count--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    int size() const { return count; }
+
+    Employee& get(int index) { return arr[index]; }
+    const Employee& get(int index) const { return arr[index]; }
+};
+
+class Salary {
+private:
+    EmployeeList employees;
+
+public:
+    void addEmployee() {
+        Employee e;
+        e.set();
+        employees.add(e);
+    }
+
+    void removeEmployee(int id) {
+        if (employees.removeById(id)) {
+            cout << "Employee with ID " << id << " removed.\n";
+        }
+        else {
+            cout << "Employee with such ID not found.\n";
+        }
+    }
+
+    void showAll() const {
+        cout << left << setw(5) << "ID"
+            << setw(25) << "Full Name"
+            << setw(10) << "Base"
+            << setw(5) << "Exp"
+            << setw(10) << "Days"
+            << setw(10) << "Total"
+            << setw(10) << "Bonus"
+            << setw(10) << "Pension"
+            << setw(10) << "Alimony"
+            << setw(10) << "Net" << endl;
+        cout << string(105, '-') << endl;
+        for (int i = 0; i < employees.size(); i++) {
+            employees.get(i).show();
+        }
+    }
+
+    void searchBySurname(const string& s) const {
+        for (int i = 0; i < employees.size(); i++) {
+            if (employees.get(i).getSurname() == s) {
+                cout << "Employee found:\n";
+                employees.get(i).show();
+                return;
+            }
+        }
+        cout << "Employee with surname " << s << " not found.\n";
+    }
+};
+
+int main() {
+    Salary salarySystem;
+    int choice;
+
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add employee\n";
+        cout << "2. Remove employee\n";
+        cout << "3. Show all employees\n";
+        cout << "4. Search by surname\n";
+        cout << "0. Exit\n";
+        cout << "Your choice: ";
+
+        if (!(cin >> choice)) {
+            cout << "Invalid input! Please enter a number.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        if (choice == 1) {
+            salarySystem.addEmployee();
+        }
+        else if (choice == 2) {
+            int id;
+            cout << "Enter employee ID to remove: ";
+            if (!(cin >> id)) {
+                cout << "Invalid input! Returning to menu.\n";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                continue;
+            }
+            salarySystem.removeEmployee(id);
+        }
+        else if (choice == 3) {
+            salarySystem.showAll();
+        }
+        else if (choice == 4) {
+            string s;
+            cout << "Enter surname to search: ";
+            cin >> s;
+            salarySystem.searchBySurname(s);
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
