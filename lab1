@@ -2,6 +2,7 @@
 #include <cmath>
 using namespace std;
 
+// Safe power function (handles negative bases correctly)
 double safePowRoot(double base, double expVal) {
     if (base >= 0) {
         return pow(base, expVal);
@@ -15,26 +16,31 @@ double safePowRoot(double base, double expVal) {
     }
 }
 
+// Function a[x, y, z, b]
 double calcA(double x, double y, double z, double b) {
-    double numerator = sqrt(pow(x * x - z, 0.3)) - cbrt(fabs(y + 2 * b));
-    double denominator = 1.0 + x + (pow(y, 2) / 2.0) + (pow(z, 3) / 6.0);
+    double numerator = sqrt(pow(fabs(x * x - z), 0.3)) - cbrt(fabs(y + 2 * b));
+    double denominator = 1.0 + (x / 1.0) + (pow(y, 2) / 2.0) + (pow(z, 3) / 6.0);
     return numerator / denominator;
 }
 
+// Function b[x, y, z]
 double calcB(double x, double y, double z) {
     double base = x * x + z;
-    double part1 = y + atan(safePowRoot(base, 0.1));
-    double part2 = (3.0 / x) + sin(2.0 * pow(y + z, 3)) + y * exp((-x + z) / (y + z));
+    double part1 = y + atan(safePowRoot(fabs(base), 0.1));
+    double part2 = (3.0 / x) + pow(sin(pow(y + z, 3)), 2) + y * exp((-x + z) / (y + z));
     return x * (part1 / part2);
 }
 
 int main() {
-    double x = 0.48;
-    double y = 0.47;
-    double z = -1.32;
+    int variant = 1; // ← enter your variant number
+    double x = 0.48 * variant;
+    double y = 0.47 * variant;
+    double z = -1.32 * variant;
+
+    // To test the program, set b as a constant value
     double b = 2.0;
 
-    cout << "Variant 1" << endl;
+    cout << "Variant " << variant << endl;
     cout << "x = " << x << ", y = " << y << ", z = " << z << ", b = " << b << endl;
     cout << "a[x,y,z,b] = " << calcA(x, y, z, b) << endl;
     cout << "b[x,y,z]   = " << calcB(x, y, z) << endl;
