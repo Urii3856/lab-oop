@@ -1,0 +1,153 @@
+#include <iostream>
+#include <string>
+#include <stdexcept>
+#include <vector>
+using namespace std;
+
+class Product {
+private:
+    string name;
+    int quantity;
+    double price;
+
+public:
+    Product(string n = "Unknown", int q = 0, double p = 0.0) {
+        setName(n);
+        setQuantity(q);
+        setPrice(p);
+    }
+
+    void setName(string n) {
+        name = n;
+    }
+
+    void setQuantity(int q) {
+        if (q < 0) throw invalid_argument("Quantity cannot be negative!");
+        quantity = q;
+    }
+
+    void setPrice(double p) {
+        if (p < 0) throw invalid_argument("Price cannot be negative!");
+        price = p;
+    }
+
+    string getName() const { return name; }
+    int getQuantity() const { return quantity; }
+    double getPrice() const { return price; }
+
+    void show() const {
+        cout << "Name: " << name
+            << ", Quantity: " << quantity
+            << ", Price: " << price << endl;
+    }
+
+    Product& operator++() {
+        quantity++;
+        return *this;
+    }
+
+    Product& operator--() {
+        if (quantity > 0) quantity--;
+        return *this;
+    }
+
+    Product& operator=(const Product& other) {
+        if (this != &other) {
+            name = other.name;
+            quantity = other.quantity;
+            price = other.price;
+        }
+        return *this;
+    }
+
+    bool operator==(const string& searchName) const {
+        return name == searchName;
+    }
+
+    bool operator==(double searchPrice) const {
+        return price == searchPrice;
+    }
+
+    bool operator==(int searchQuantity) const {
+        return quantity == searchQuantity;
+    }
+};
+
+class Warehouse {
+private:
+    vector<Product> products;
+
+public:
+    void addProduct(const Product& p) {
+        products.push_back(p);
+    }
+
+    Product& getProduct(int index) {
+        if (index < 0 || index >= (int)products.size())
+            throw out_of_range("Invalid index!");
+        return products[index];
+    }
+
+    void showAll() const {
+        cout << "=== Warehouse Content ===" << endl;
+        for (const auto& p : products) {
+            p.show();
+        }
+    }
+
+    void searchByName(const string& name) const {
+        cout << "Search by name \"" << name << "\":" << endl;
+        for (const auto& p : products) {
+            if (p == name) p.show();
+        }
+    }
+
+    void searchByPrice(double price) const {
+        cout << "Search by price " << price << ":" << endl;
+        for (const auto& p : products) {
+            if (p == price) p.show();
+        }
+    }
+
+    void searchByQuantity(int quantity) const {
+        cout << "Search by quantity " << quantity << ":" << endl;
+        for (const auto& p : products) {
+            if (p == quantity) p.show();
+        }
+    }
+};
+
+int main() {
+    try {
+        Warehouse warehouse;
+
+        warehouse.addProduct(Product("Apples", 50, 12.5));
+        warehouse.addProduct(Product("Bananas", 30, 25.0));
+        warehouse.addProduct(Product("Oranges", 40, 20.0));
+
+        warehouse.showAll();
+
+        cout << "\n=== Operator Overloading Demo ===" << endl;
+
+        ++warehouse.getProduct(0);  // збільшили кількість яблук
+        --warehouse.getProduct(1);  // зменшили кількість бананів
+        warehouse.getProduct(2) = warehouse.getProduct(0); // апельсини = яблука
+
+        warehouse.showAll();
+
+        cout << "\n=== Searching Demo ===" << endl;
+        warehouse.searchByName("Bananas");
+        warehouse.searchByPrice(12.5);
+        warehouse.searchByQuantity(51);
+
+        // приклад помилки
+        Product bad("Pears", -10, 15.0);
+        warehouse.addProduct(bad);
+
+    }
+    catch (const exception& e) {
+        cerr << "Error: " << e.what() << endl;
+    }
+
+    return 0;
+}
