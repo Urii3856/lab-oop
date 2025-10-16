@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include <vector>
+#include <iomanip>
 using namespace std;
 
 class Product {
@@ -37,18 +37,30 @@ public:
 
     void show() const {
         cout << "Name: " << name
-            << ", Quantity: " << quantity
-            << ", Price: " << price << endl;
+             << ", Quantity: " << quantity
+             << ", Price: " << fixed << setprecision(2) << price << endl;
     }
 
     Product& operator++() {
-        quantity++;
+        ++quantity;
         return *this;
     }
 
+    Product operator++(int) {
+        Product temp = *this;
+        ++quantity;
+        return temp;
+    }
+
     Product& operator--() {
-        if (quantity > 0) quantity--;
+        if (quantity > 0) --quantity;
         return *this;
+    }
+
+    Product operator--(int) {
+        Product temp = *this;
+        if (quantity > 0) --quantity;
+        return temp;
     }
 
     Product& operator=(const Product& other) {
@@ -75,46 +87,47 @@ public:
 
 class Warehouse {
 private:
-    vector<Product> products;
+    static const int MAX_PRODUCTS = 100;
+    Product products[MAX_PRODUCTS];
+    int count;
 
 public:
+    Warehouse() : count(0) {}
+
     void addProduct(const Product& p) {
-        products.push_back(p);
+        if (count >= MAX_PRODUCTS) throw overflow_error("Warehouse is full!");
+        products[count++] = p;
     }
 
     Product& getProduct(int index) {
-        if (index < 0 || index >= (int)products.size())
-            throw out_of_range("Invalid index!");
+        if (index < 0 || index >= count) throw out_of_range("Invalid index!");
         return products[index];
     }
 
     void showAll() const {
         cout << "=== Warehouse Content ===" << endl;
-        for (const auto& p : products) {
-            p.show();
-        }
+        for (int i = 0; i < count; ++i) products[i].show();
     }
 
-    void searchByName(const string& name) const {
+    void search(const string& name) const {
         cout << "Search by name \"" << name << "\":" << endl;
-        for (const auto& p : products) {
-            if (p == name) p.show();
-        }
+        for (int i = 0; i < count; ++i)
+            if (products[i] == name) products[i].show();
     }
 
-    void searchByPrice(double price) const {
-        cout << "Search by price " << price << ":" << endl;
-        for (const auto& p : products) {
-            if (p == price) p.show();
-        }
+    void search(double price) const {
+        cout << "Search by price " << fixed << setprecision(2) << price << ":" << endl;
+        for (int i = 0; i < count; ++i)
+            if (products[i] == price) products[i].show();
     }
 
-    void searchByQuantity(int quantity) const {
+    void search(int quantity) const {
         cout << "Search by quantity " << quantity << ":" << endl;
-        for (const auto& p : products) {
-            if (p == quantity) p.show();
-        }
+        for (int i = 0; i < count; ++i)
+            if (products[i] == quantity) products[i].show();
     }
+
+    int size() const { return count; }
 };
 
 int main() {
@@ -129,21 +142,19 @@ int main() {
 
         cout << "\n=== Operator Overloading Demo ===" << endl;
 
-        ++warehouse.getProduct(0);  // збільшили кількість яблук
-        --warehouse.getProduct(1);  // зменшили кількість бананів
-        warehouse.getProduct(2) = warehouse.getProduct(0); // апельсини = яблука
+        ++warehouse.getProduct(0);
+        --warehouse.getProduct(1);
+        warehouse.getProduct(2) = warehouse.getProduct(0);
 
         warehouse.showAll();
 
         cout << "\n=== Searching Demo ===" << endl;
-        warehouse.searchByName("Bananas");
-        warehouse.searchByPrice(12.5);
-        warehouse.searchByQuantity(51);
+        warehouse.search("Bananas");
+        warehouse.search(12.5);
+        warehouse.search(51);
 
-        // приклад помилки
         Product bad("Pears", -10, 15.0);
         warehouse.addProduct(bad);
-
     }
     catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;
