@@ -1,0 +1,92 @@
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+using namespace std;
+
+// --- Task 1: Class for function calculations ---
+class FunctionCalculator {
+private:
+    // y, z, b are constants; x will change during tabulation
+    double y, z, b;
+
+public:
+    // Constructor to initialize constant values
+    FunctionCalculator(double y_val, double z_val, double b_val) {
+        y = y_val;
+        z = z_val;
+        b = b_val;
+    }
+
+    // Method to calculate function a(x)
+    double calculateA(double x) {
+        double term1 = sqrt(pow(fabs(x * x - z), 0.3));
+        double term2 = cbrt(fabs(y + 2 * b));
+
+        double numerator = term1 - term2;
+        double denominator = 1.0 + x + (pow(y, 2) / 2.0) + (pow(z, 3) / 6.0);
+
+        // Prevent division by zero
+        if (fabs(denominator) < 1e-12) {
+            return NAN;
+        }
+        return numerator / denominator;
+    }
+
+    // Method to calculate function b(x)
+    double calculateB(double x) {
+        if (fabs(x) < 1e-12) {
+            return NAN; // avoid division by zero
+        }
+
+        double base = fabs(x * x + z);
+        double numerator_fraction = y + atan(pow(base, 0.1));
+        double sin_term = pow(sin(pow(y + z, 3)), 2);
+        double exp_term = y * exp((-x + z) / (y + z));
+        double denominator_fraction = (3.0 / x) + sin_term;
+
+        return x * (numerator_fraction / denominator_fraction + exp_term);
+    }
+};
+
+// --- Task 2: Function tabulation ---
+int main() {
+    // Constants from Task 1 (variant 1)
+    double y = 0.47;
+    double z = -1.32;
+    double b = 2.0;
+
+    // Create calculator object with given constants
+    FunctionCalculator calculator(y, z, b);
+
+    // Tabulation parameters
+    double x_start = -1.0;
+    double x_end = 1.0;
+    double dx = 0.2;
+
+    // Print table header
+    cout << fixed << setprecision(6);
+    cout << "--- Tabulation of functions a(x) and b(x) ---\n";
+    cout << "----------------------------------------------\n";
+    cout << "|    x     |     a(x)    |     b(x)     |\n";
+    cout << "----------------------------------------------\n";
+
+    // Loop for tabulation
+    for (double x = x_start; x <= x_end + 1e-9; x += dx) {
+        double a_val = calculator.calculateA(x);
+        double b_val = calculator.calculateB(x);
+
+        cout << "| " << setw(8) << x << " | ";
+        if (isnan(a_val))
+            cout << setw(11) << "undefined" << " | ";
+        else
+            cout << setw(11) << a_val << " | ";
+
+        if (isnan(b_val))
+            cout << setw(12) << "division by 0" << " |\n";
+        else
+            cout << setw(12) << b_val << " |\n";
+    }
+
+    cout << "----------------------------------------------\n";
+    return 0;
+}
