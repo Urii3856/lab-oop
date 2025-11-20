@@ -1,0 +1,69 @@
+#include <iostream>
+#include <iomanip>
+
+class CURRENCY {
+protected:
+    double uahAmount;
+
+public:
+    CURRENCY(double uah) : uahAmount(uah) {}
+    virtual ~CURRENCY() {}
+    virtual double convertToCurrency() const = 0;
+
+    double getUahAmount() const {
+        return uahAmount;
+    }
+};
+
+class ToEuro : public CURRENCY {
+private:
+    double exchangeRate;
+
+public:
+    ToEuro(double uah, double rate) : CURRENCY(uah), exchangeRate(rate) {}
+
+    double convertToCurrency() const override {
+        if (exchangeRate == 0) return 0;
+        return uahAmount / exchangeRate;
+    }
+};
+
+class ToDollar : public CURRENCY {
+private:
+    double exchangeRate;
+
+public:
+    ToDollar(double uah, double rate) : CURRENCY(uah), exchangeRate(rate) {}
+
+    double convertToCurrency() const override {
+        if (exchangeRate == 0) return 0;
+        return uahAmount / exchangeRate;
+    }
+};
+
+int main() {
+    double initialUah = 1000.0;
+
+    double uahPerEuroRate = 42.50;
+    double uahPerDollarRate = 39.80;
+
+    ToEuro euroConverter(initialUah, uahPerEuroRate);
+    ToDollar dollarConverter(initialUah, uahPerDollarRate);
+
+    CURRENCY* currencyPtr;
+
+    std::cout << std::fixed << std::setprecision(2);
+
+    std::cout << "Initial amount: " << initialUah << " UAH" << std::endl;
+    std::cout << "-------------------------------------" << std::endl;
+
+    currencyPtr = &euroConverter;
+    std::cout << "Amount in Euro at rate " << uahPerEuroRate << ": "
+              << currencyPtr->convertToCurrency() << " EUR" << std::endl;
+
+    currencyPtr = &dollarConverter;
+    std::cout << "Amount in Dollar at rate " << uahPerDollarRate << ": "
+              << currencyPtr->convertToCurrency() << " USD" << std::endl;
+
+    return 0;
+}
