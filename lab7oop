@@ -1,0 +1,28 @@
+#include <iostream>
+#include <string>
+#include <map>
+
+int main() {
+    std::map<std::string, std::string> students;
+
+    students["Petrenko"] = "Petro";
+    students["Ivanenko"] = "Ivan";
+    students["Sydorenko"] = "Olha";
+    students["Kovalchuk"] = "Andriy";
+    students["Shevchenko"] = "Maria";
+
+    std::string surname_to_find;
+    std::cout << "Enter the student's surname to search: ";
+    std::cin >> surname_to_find;
+
+    auto it = students.find(surname_to_find);
+
+    if (it != students.end()) {
+        std::cout << "Student's first name: " << it->second << std::endl;
+    }
+    else {
+        std::cout << "Student with surname '" << surname_to_find << "' not found." << std::endl;
+    }
+
+    return 0;
+}
