@@ -1,0 +1,46 @@
+#include <iostream>
+#include <algorithm>
+
+template <typename T>
+class ArraySorter {
+private:
+    T* arr;
+    int size;
+
+public:
+    ArraySorter(T* inputArr, int n) : arr(inputArr), size(n) {}
+
+    void sortAscending() {
+        std::sort(arr, arr + size);
+    }
+
+    void printArray() const {
+        for (int i = 0; i < size; i++) {
+            std::cout << arr[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+};
+
+int main() {
+    int intArr[] = { 5, 2, 9, 1, 7 };
+    double doubleArr[] = { 3.14, 2.71, 1.41, 4.67 };
+
+    ArraySorter<int> sorter1(intArr, 5);
+    std::cout << "Int array before sorting: ";
+    sorter1.printArray();
+
+    sorter1.sortAscending();
+    std::cout << "Int array after sorting: ";
+    sorter1.printArray();
+
+    ArraySorter<double> sorter2(doubleArr, 4);
+    std::cout << "Double array before sorting: ";
+    sorter2.printArray();
+
+    sorter2.sortAscending();
+    std::cout << "Double array after sorting: ";
+    sorter2.printArray();
+
+    return 0;
+}
