@@ -1,0 +1,15 @@
+#include <iostream>
+
+
+template <typename T>
+T multiplyByTwo(const T& value) {
+    return value * 2;
+}
+
+int main() {
+    std::cout << "int: " << multiplyByTwo(5) << std::endl;         
+    std::cout << "double: " << multiplyByTwo(3.14) << std::endl;   
+    std::cout << "long: " << multiplyByTwo(100000L) << std::endl;  
+
+    return 0;
+}
