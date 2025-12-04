@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <functional>
+
+void printVector(const std::string& label, const std::vector<int>& vec) {
+    std::cout << label;
+    for (int x : vec) {
+        std::cout << x << " ";
+    }
+    std::cout << std::endl;
+}
+
+int main() {
+    std::vector<int> numbers = { 8, -2, 5, -9, 12, 1, 0, -4, 10, 3 };
+
+    printVector("Original array: ", numbers);
+    std::cout << "--------------------------------\n";
+
+    int sum_of_negatives = std::accumulate(numbers.begin(), numbers.end(), 0,
+        [](int sum, int current) {
+            return current < 0 ? sum + current : sum;
+        });
+    std::cout << "Sum of negative elements: " << sum_of_negatives << std::endl;
+
+    if (numbers.size() >= 2) {
+        auto p = std::minmax_element(numbers.begin(), numbers.end());
+        auto min_it = p.first;
+        auto max_it = p.second;
+
+        if (min_it > max_it) {
+            std::swap(min_it, max_it);
+        }
+
+        long long product = 1;
+        if (std::distance(min_it, max_it) > 1) {
+            product = std::accumulate(std::next(min_it), max_it, 1LL, std::multiplies<long long>());
+        }
+
+        std::cout << "Product of elements between min (" << *min_it << ") and max (" << *max_it << "): " << product << std::endl;
+    }
+
+    std::sort(numbers.begin(), numbers.end());
+    printVector("Array sorted in ascending order: ", numbers);
+
+    return 0;
+}
