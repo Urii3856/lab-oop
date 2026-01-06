@@ -1,0 +1,103 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Transport {
+protected:
+    string name;
+    int capacity;
+    double speed;
+
+public:
+    Transport(string n = "Unknown", int c = 0, double s = 0.0)
+        : name(n), capacity(c), speed(s) {
+    }
+
+    virtual void showInfo(ostream& os) const {
+        os << "Name: " << name << ", Capacity: " << capacity
+            << ", Speed: " << speed << " km/h";
+    }
+
+    virtual ~Transport() {}
+};
+
+class Car : public Transport {
+    string fuelType;
+public:
+    Car(string n, int c, double s, string fuel)
+        : Transport(n, c, s), fuelType(fuel) {
+    }
+
+    void showInfo(ostream& os) const override {
+        os << "[Car] ";
+        Transport::showInfo(os);
+        os << ", Fuel: " << fuelType << endl;
+    }
+};
+
+class Truck : public Transport {
+    double loadCapacity;
+public:
+    Truck(string n, int c, double s, double load)
+        : Transport(n, c, s), loadCapacity(load) {
+    }
+
+    void showInfo(ostream& os) const override {
+        os << "[Truck] ";
+        Transport::showInfo(os);
+        os << ", Load capacity: " << loadCapacity << " tons" << endl;
+    }
+};
+
+class Ship : public Transport {
+    string type;
+public:
+    Ship(string n, int c, double s, string t)
+        : Transport(n, c, s), type(t) {
+    }
+
+    void showInfo(ostream& os) const override {
+        os << "[Ship] ";
+        Transport::showInfo(os);
+        os << ", Type: " << type << endl;
+    }
+};
+
+class Plane : public Transport {
+    double flightRange;
+public:
+    Plane(string n, int c, double s, double range)
+        : Transport(n, c, s), flightRange(range) {
+    }
+
+    void showInfo(ostream& os) const override {
+        os << "[Plane] ";
+        Transport::showInfo(os);
+        os << ", Flight range: " << flightRange << " km" << endl;
+    }
+};
+
+int main() {
+    vector<Transport*> vehicles;
+
+    vehicles.push_back(new Car("Mercedes", 5, 180, "Petrol"));
+    vehicles.push_back(new Truck("Volvo Truck", 2, 120, 20));
+    vehicles.push_back(new Ship("Titanic", 2400, 40, "Passenger"));
+    vehicles.push_back(new Plane("Boeing 747", 400, 900, 12000));
+
+    ofstream fout("transport.txt");
+
+    cout << "=== Transport Info ===" << endl;
+    for (auto v : vehicles) {
+        v->showInfo(cout);
+        v->showInfo(fout);
+    }
+
+    fout.close();
+
+    for (auto v : vehicles) delete v;
+
+    return 0;
+}
